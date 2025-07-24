@@ -5,19 +5,19 @@
 #define MAXNODE 100005
 #define MAXLEN 1000005
 #define ALPHABET 26
-
+#define MAXWORDS 105
 
 int next[MAXNODE][ALPHABET];
 int fail[MAXNODE];
 int outputLength[MAXNODE];
 int nodeCount;
-
-
 int queue[MAXNODE];
-
 int matchStart[MAXLEN];
 int matchEnd[MAXLEN];
+int matchIndex[MAXLEN];
 int matchCount;
+char words[MAXWORDS][105];
+
 
 int newNode() {
     for (int i = 0; i < ALPHABET; i++)
@@ -27,28 +27,33 @@ int newNode() {
     return nodeCount++;
 }
 
-void insert(char *word) {
+void insert(int wordIndex) {
     int u = 0;
-    for (int i = 0; word[i]; i++) {
-        int c = word[i] - 'a';
+    int i = 0;
+    while (words[wordIndex][i] != '\0') {
+        int c = words[wordIndex][i] - 'a';
         if (!next[u][c]) {
             next[u][c] = newNode();
         }
         u = next[u][c];
+        i++;
     }
-    outputLength[u] = strlen(word);
+    outputLength[u] = i; 
 }
 
 void build() {
-    int front = 0, back = 0;
+    int nodes[MAXNODE];
+    int size = 0;
+
     for (int c = 0; c < ALPHABET; c++) {
         if (next[0][c]) {
             fail[next[0][c]] = 0;
-            queue[back++] = next[0][c];
+            nodes[size++] = next[0][c];
         }
     }
-    while (front < back) {
-        int r = queue[front++];
+
+    for (int i = 0; i < size; i++) {
+        int r = nodes[i];
         for (int c = 0; c < ALPHABET; c++) {
             int u = next[r][c];
             if (!u) continue;
@@ -56,14 +61,15 @@ void build() {
             while (f && !next[f][c]) f = fail[f];
             if (next[f][c]) f = next[f][c];
             fail[u] = f;
+
             if (!outputLength[u])
                 outputLength[u] = outputLength[f];
-            queue[back++] = u;
+
+            nodes[size++] = u;
         }
     }
 }
 
-int matchIndex[MAXLEN];
 
 int compare(const void *a, const void *b) {
     int i = *(int*)a;
@@ -71,8 +77,10 @@ int compare(const void *a, const void *b) {
     return matchEnd[i] - matchEnd[j];
 }
 
-int minDeletions(char *s) {
-    int len = strlen(s);
+int minDeletions(char s[]) {
+    int len = 0;
+    while (s[len] != '\0') len++;
+
     int u = 0;
     matchCount = 0;
 
@@ -113,15 +121,14 @@ int minDeletions(char *s) {
 
 int main() {
     int n, m;
-    scanf("%d", &n);
-    scanf("%d", &m);
+    scanf("%d", &n); 
+    scanf("%d", &m); 
 
     nodeCount = 1;
 
-    char word[105];
     for (int i = 0; i < m; i++) {
-        scanf("%s", word);
-        insert(word);
+        scanf("%s", words[i]);
+        insert(i);
     }
 
     build();
