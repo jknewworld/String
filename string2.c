@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h> 
 
 #define MAX_LEN 1001
 #define MAX_CASES 1024
